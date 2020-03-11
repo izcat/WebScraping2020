@@ -6,7 +6,7 @@ plt.rcParams['font.sans-serif']=['SimHei']
 plt.rcParams['axes.unicode_minus'] = False
 
 # 调用plt画图
-def showPLT(x, y, sig='.', xlabel='', ylabel='', title=''):
+def showPLT(x, y, sig='-', xlabel='', ylabel='', title=''):
 	"""
 	para: x 横坐标list
 	para: y 纵坐标list
@@ -65,12 +65,16 @@ with open('data.txt', 'r', encoding='UTF-8') as f:
 	# eachDistrict 是一个元素为13元组的列表
 	# 每一个元组为每一天武汉市13个区的确诊数据
 	# 确诊数据类型为'str'
-	eachDistrict = list(map(lambda x:tuple(map(int, x)), eachDistrict))
-	# print(eachDistrict)
-	# 以下三行为上面的等价操作（忽略tuple类型）
+	
+	# 每项数据转换为 'int'
 	# for i in range(len(eachDistrict)):
 	# 	for j in range(len(eachDistrict[0])):
 	# 		ConfirmedofDistrict[i] += [int(eachDistrict[i][j])]
+
+	# 以上三行的等价操作（忽略tuple类型）
+	eachDistrict = list(map(lambda x:tuple(map(int, x)), eachDistrict))
+	# print(eachDistrict)
+	
 
 	全市核酸检测 = list(map(int, inspectPCR))
 	发热门诊接诊 = list(map(int, feverEveryday))
@@ -80,24 +84,28 @@ with open('data.txt', 'r', encoding='UTF-8') as f:
 	新增死亡病例 = list(map(int, newDead))
 	新增疑似病例 = list(map(int, newSuspected))
 
-	
 	# eachDistrict行列转换 ==> ConfirmedofDistrict
 	# ConfirmedofDistrict 为二维数组 共13行
 	# 每行为一个区的全部每日确诊数据
-	for i in range(len(eachDistrict)):
-		eachDistrict[i] = list(map(int, eachDistrict[i]))
-		item = eachDistrict[i]
-		for j in range(len(item)):
-			ConfirmedofDistrict[j].append(item[j])
-			# newConfirmedofDistrict[j].append(ConfirmedofDistrict[j][-1]-ConfirmedofDistrict[j][-2] if len(ConfirmedofDistrict[j])>1
-			# 								 else ConfirmedofDistrict[j][0])
-			# 新增从23日开始
-			if len(ConfirmedofDistrict[j])>1:
-				newConfirmedofDistrict[j].append(ConfirmedofDistrict[j][-1]-ConfirmedofDistrict[j][-2])
+	# for i in range(len(eachDistrict)):
+	# 	eachDistrict[i] = list(map(int, eachDistrict[i]))
+	# 	item = eachDistrict[i]
+	# 	for j in range(len(item)):
+	# 		ConfirmedofDistrict[j].append(item[j])
+	# 		# newConfirmedofDistrict[j].append(ConfirmedofDistrict[j][-1]-ConfirmedofDistrict[j][-2] if len(ConfirmedofDistrict[j])>1
+	# 		# 								 else ConfirmedofDistrict[j][0])
+	# 		# 新增从23日开始
+	# 		if len(ConfirmedofDistrict[j])>1:
+	# 			newConfirmedofDistrict[j].append(ConfirmedofDistrict[j][-1]-ConfirmedofDistrict[j][-2])
 			
-	print(ConfirmedofDistrict)
-	# print(len(eachDistrict))
-
+	# 以上ConfirmedofDistrict转化和新增确诊计算的等价操作，两行解决
+	ConfirmedofDistrict = list(zip(*eachDistrict))
+	newConfirmedofDistrict = list(map(lambda days:([days[i]-days[i-1] for i in range(1, len(days))]), ConfirmedofDistrict))
+	# print(test1)  
+	# print(test1==list(map(tuple, ConfirmedofDistrict))) # True
+	
+	# print(newConfirmedofDistrict)
+	# print(test==newConfirmedofDistrict) # True
 
 # 现有确诊变化
 def showNowLeft():
@@ -138,11 +146,12 @@ def showNewDistrict():
 	# days = ['2.2'+str(i) for i in range(3,10)]
 	# for i in range(1, len(newConfirmedofDistrict)-2):
 	# 	days.append('3.'+str(i))
-	days.pop(0)
+	# days.pop(0)
+
 	for i in range(len(newConfirmedofDistrict)):
 		# if i==2 or i==3 or i==4 or i==6:
 			# continue
-		plt.plot(days, newConfirmedofDistrict[i], label=districtName[i])
+		plt.plot(days[1:], newConfirmedofDistrict[i], label=districtName[i])
 
 	plt.xlabel('日期')
 	plt.ylabel('每日新增确诊')
@@ -177,7 +186,7 @@ def showDistrict():
 	plt.show()
 
 
-# showDistrict()
-# showNewDistrict()
-# showConfirmRatio()
-# showNowLeft()
+showDistrict()
+showNewDistrict()
+showConfirmRatio()
+showNowLeft()
