@@ -1,4 +1,5 @@
 from requests_html import HTMLSession
+import requests
 import datetime
 import time
 import re
@@ -6,31 +7,27 @@ from mymail import myMail
 
 
 # 获取昨日数据链接
-def getURL(yesterday):
-	print('entering getURL')
-	url = "http://wjw.wuhan.gov.cn/front/web/list3rd/yes/803"
-	session = HTMLSession()
-	r = session.get(url)
-	elements = r.html.find('div.xxgksublist')
+def getURL(date):
+	"""
+	获取日期为date的武汉疫情信息所在网页URL
+	网站未更新时返回None
+	para: datetime.date
+	return: str / None
+	"""
+	matchRe = '<a href="(http://[^\s]+)" title="(.*)">' 
+	url = 'http://wjw.wuhan.gov.cn/front/web/list3rd/yes/803'
+	# 必须要定制HTTP请求头
+	headers = {'user-agent': 'my-app/0.0.1'}
+	r = requests.get(url, headers=headers)
+	html = r.text
 
-	# 原始HTML格式
-	html = str(elements[0].html)
-	lines = html.split('</a>')
+	allnews = re.findall(matchRe, html)
 
-	for line in lines:
-		titles = re.findall('武汉市新冠肺炎疫情动态（2020年%d月%d日）' % (yesterday.month, yesterday.day), line)
-		if len(titles)==0 :
-			continue
+	for url, title in allnews:
+		if title.startswith('武汉市新冠肺炎疫情动态（2020年%d月%d日）' % (date.month, date.day)):
+			return url
 
-		# print(titles)
-		url = 'http://wjw.wuhan.gov.cn:80/front/web/showDetail/'
-		res = re.findall(url+'(\d+)', line)
-		# print(url+res[0])
-
-		return url+res[0]
 	return None
-
-# print(getURL())
 
 def everydayRun():
 	print('entering everydayRun')
