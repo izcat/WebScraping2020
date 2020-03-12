@@ -31,7 +31,9 @@
 
 - 解决方法：
 
-  - [ ] 改用requests库
+  - [x] 改用requests库
+  
+    没有了requests_html十分方便的text方法获取元素内容，利用xpath手动解析
 
 &nbsp;
 
